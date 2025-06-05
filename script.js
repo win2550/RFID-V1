@@ -1376,6 +1376,68 @@ function getLast7DaysData() {
   return combined;
 }
 
+// ===== 🔥 Firebase Config & Init =====
+const firebaseConfig = {
+  apiKey: "AIzaSyCnaMdvJ_P9Bza3_oPFMu48CQQh8FLHqPM",
+  authDomain: "student-coupon-system.firebaseapp.com",
+  projectId: "student-coupon-system",
+  storageBucket: "student-coupon-system.firebasestorage.app",
+  messagingSenderId: "798033570111",
+  appId: "1:798033570111:web:bc60e0f0e50af3fda30b8a",
+  measurementId: "G-WWGQQRBQES"
+};
+
+// ✅ ใช้กับ Firebase SDK v8
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ===== 💾 ฟังก์ชันบันทึกการใช้คูปอง =====
+function saveCouponUsage(name, id, shop, room) {
+  const time = new Date();
+  const data = {
+    name,
+    id,
+    shop,
+    room,
+    time: time.toISOString(),
+    date: time.toLocaleDateString()
+  };
+  db.ref(`coupon_usage/${room}`).push(data);
+}
+
+// ===== 📥 ฟังก์ชันโหลดข้อมูลจาก Firebase =====
+function loadUsageByRoom(room, tableId) {
+  const tbody = document.getElementById(tableId);
+  tbody.innerHTML = "";
+  db.ref(`coupon_usage/${room}`).on("value", (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+    let index = 1;
+    Object.values(data).forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${index++}</td>
+        <td>${item.name}</td>
+        <td>${item.id}</td>
+        <td>${item.shop}</td>
+        <td>${new Date(item.time).toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+
+
+// เรียกเมื่อโหลดหน้า view สถิติวันนี้
+window.onload = () => {
+  loadUsageByRoom("m11", "today-body"); // ตัวอย่าง ม.1/1
+};
+
+
+  // โหลดข้อมูลอัตโนมัติเมื่อเปิดหน้าเว็บ
+  window.onload = loadCouponUsage;
+
 
 // เปิดให้ใช้ใน HTML
 window.switchView = switchView;
