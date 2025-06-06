@@ -1,0 +1,879 @@
+/* --- Global Imports & Base Styles --- */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&family=Prompt:wght@300;400;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'); /* สำหรับไอคอนสวยๆ */
+
+a {
+  text-decoration: none; /* ลบเส้นใต้ของลิงก์ทั้งหมด */
+  color: inherit; /* ทำให้ลิงก์ใช้สีของตัวอักษรที่มันอยู่ (ไม่เปลี่ยนเป็นสีน้ำเงิน) */
+}
+
+body {
+  margin: 0;
+  font-family: 'Prompt', 'Kanit', sans-serif; /* ใช้ Prompt เป็นหลัก, Kanit เป็นรอง, ตระกูล Sans-serif ทั่วไปเป็นตัวเลือกสุดท้าย */
+  background-color: #eef2f6; /* สีพื้นหลังอ่อนๆ สบายตา */
+  color: #333; /* สีตัวอักษรเริ่มต้น */
+  line-height: 1.6;
+  overflow-x: hidden; /* ป้องกัน scrollbar แนวนอนที่อาจเกิดจาก layout ผิดพลาด */
+  transition: background-color 0.3s ease;
+}
+
+/* --- Page Containers --- */
+.page {
+  display: none; /* ซ่อนทุกหน้าเริ่มต้น */
+  min-height: 100vh; /* ให้หน้ามีความสูงขั้นต่ำเต็มจอ */
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  opacity: 0; /* เพิ่ม opacity สำหรับ fade-in/out */
+  transition: opacity 0.5s ease-in-out;
+}
+
+.page.active {
+  display: block; /* แสดงเฉพาะหน้าที่ active */
+  opacity: 1; /* Fade in */
+}
+
+/* --- Login Page Styles --- */
+/* รูปภาพพื้นหลัง (img ที่มี id="login-page") */
+/*
+   จากการตรวจสอบ HTML ของคุณ:
+   <div id="login-page" class="page active">
+     <img src="รูป.รร.ชัด v2.jpeg" id="login-page" class="page active" alt="">
+       <div class="login-container"> ... </div>
+   </div>
+   พบว่า id="login-page" ถูกใช้ซ้ำกันทั้งบน <div> และ <img>
+   ซึ่งตามหลัก HTML แล้ว ID ควรจะต้องไม่ซ้ำกัน
+   แต่ในตอนนี้เราจะใช้ selector ที่เลือก img ที่มี id="login-page" โดยตรง
+   และกำหนด z-index: -1 เพื่อให้รูปภาพนี้อยู่ด้านหลัง element อื่นๆ ทั้งหมด
+*/
+img#login-page { /* Selector นี้จะเลือก img ที่มี id="login-page" */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.4) blur(5px); /* ทำให้มืดและเบลอมากขึ้นเพื่อความสวยงาม */
+  transform: scale(1.05);
+  z-index: -1; /* สำคัญ: กำหนด z-index เป็น -1 ให้อยู่ด้านหลัง */
+}
+
+/* Overlay (ถ้ามีใน HTML - เพื่อความสวยงาม) */
+/* หากคุณมี <div class="login-overlay"> ใน HTML 
+   คุณสามารถเพิ่มได้ระหว่าง <img> กับ <div class="login-container"> เพื่อให้ได้ผลลัพธ์ที่ดีที่สุด
+   แต่ถ้าไม่มีก็ไม่มีผลเสียอื่นๆ เพียงแต่จะไม่เห็น overlay นี้ */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* สีดำโปร่งแสงเข้มขึ้น */
+  z-index: 1; /* ให้อยู่เหนือรูป แต่ใต้ form */
+}
+
+/* Login Form Container - ตรงกลางและมีสไตล์ที่สวยงาม */
+.login-container {
+  padding-bottom: 20px !important;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 40px 30px; /* ปรับ padding */
+  border-radius: 15px; /* ขอบโค้งมนมากขึ้น */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); /* เงาเข้มและกว้างขึ้น */
+  text-align: center;
+  width: 90%;
+  max-width: 420px; /* เพิ่ม max-width เล็กน้อย */
+  box-sizing: border-box;
+  z-index: 2; /* ให้อยู่บนสุด */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: fadeInZoom 0.8s ease-out forwards; /* เปลี่ยน animation */
+  backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอพื้นหลังของ form (ถ้าเบราว์เซอร์รองรับ) */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* เพิ่มเส้นขอบโปร่งแสง */
+}
+
+@keyframes fadeInZoom {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.login-container h2 {
+  margin-top: 10px !important;
+  margin-bottom: 30px;
+  color: #007bff; /* สีน้ำเงินสว่าง */
+  font-size: 2.2rem; /* เพิ่มขนาดหัวข้อ */
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Input Fields --- */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="number"],
+select {
+  width: calc(100% - 24px);
+  padding: 14px; /* เพิ่ม padding */
+  margin-bottom: 20px; /* เพิ่ม margin-bottom */
+  border: 1px solid #ccd6e0; /* สีเส้นขอบอ่อนลง */
+  border-radius: 10px; /* ขอบโค้งมนมากขึ้น */
+  font-size: 1.05rem; /* เพิ่มขนาด font */
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  background-color: #f8fbfc; /* พื้นหลังสีอ่อน */
+}
+
+input:focus,
+select:focus {
+  border-color: #0099ff; /* สีน้ำเงินที่สว่างขึ้นเมื่อ focus */
+  box-shadow: 0 0 0 4px rgba(0, 153, 255, 0.2); /* เงาเมื่อ focus ที่ชัดเจนขึ้น */
+  outline: none;
+  background-color: #ffffff;
+}
+
+/* --- Buttons --- */
+button {
+  color: rgb(0, 0, 0);
+  background-color: rgb(90, 207, 90);
+  height: 48.000002px !important;
+  border-left-style: solid !important;
+  border-left-width: 0px !important;
+  margin-left: 20px !important;
+  margin-right: 20px !important;
+
+  padding: 14px 25px; /* เพิ่ม padding */
+  border: none;
+  border-radius: 10px; /* ขอบโค้งมนมากขึ้น */
+  cursor: pointer;
+  font-size: 1.1rem; /* เพิ่มขนาด font */
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* เพิ่มระยะห่าง */
+  letter-spacing: 0.5px; /* เพิ่มระยะห่างตัวอักษร */
+}
+
+button:hover {
+  transform: translateY(-3px); /* ขยับขึ้นมากขึ้น */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* เงาที่ชัดเจนขึ้น */
+}
+
+/* Specific button colors */
+#login-button,
+.login {
+  background-color: #007bff;
+  color: white;
+  background: linear-gradient(to right, #007bff, #0056b3); /* เพิ่ม gradient */
+}
+#login-button:hover,
+.logout {
+  background-color: #0056b3;
+  background: linear-gradient(to right, #0056b3, #003d80);
+}
+.menu-btn {
+  background-color: #6c757d;
+  color: white;
+  background: linear-gradient(to right, #6c757d, #5a6268);
+}
+.menu-btn:hover {
+  background-color: #5a6268;
+  background: linear-gradient(to right, #5a6268, #495057);
+}
+
+/* --- Error Message --- */
+#login-error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px; /* ขอบโค้งมน */
+  padding: 12px; /* เพิ่ม padding */
+  margin-top: 20px; /* เพิ่ม margin */
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* --- Header Bar --- */
+.แถบบน {
+  background-color: #ffffff;
+  color: #333;
+  padding: 5px 30px; /* เพิ่ม padding */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* เงาที่ชัดเจนขึ้น */
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Header ควรอยู่บนสุด */
+  box-sizing: border-box;
+  backdrop-filter: blur(8px); /* เพิ่ม blur effect */
+  border-bottom: 1px solid rgba(200, 200, 200, 0.3); /* เส้นขอบบางๆ */
+}
+
+.แถบบน .loin { /* Logo in header */
+  height: 45px; /* เพิ่มขนาดโลโก้ */
+  width: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px; /* เพิ่มระยะห่าง */
+  border: 2px solid #007bff; /* เพิ่มเส้นขอบ */
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+  z-index: 1001; /* ให้โลโก้อยู่บน Header อีกที (ถ้าจำเป็น) */
+}
+
+.แถบบน .หัวข้อ { /* Title in header */
+  margin: 0;
+  font-size: 1.5rem; /* เพิ่มขนาดหัวข้อ */
+  font-weight: 700; /* เพิ่มความหนา */
+  color: #2c3e50; /* สีเข้มขึ้น */
+  flex-grow: 1;
+  text-shadow: 0.5px 0.5px 1px rgba(0,0,0,0.05);
+}
+
+.แถบบน .menu-btn, .แถบบน .logout-btn {
+  margin-left: 10px; /* เพิ่มระยะห่าง */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* ระยะห่างไอคอนกับข้อความ */
+}
+
+/* --- Main App Layout --- */
+.app-content {
+  display: flex;
+  padding-top: 80px; /* เว้นที่ให้ header fixed (ปรับให้ตรงกับความสูง header ใหม่) */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  max-height: 1000px;
+  /* min-height: 350px; */
+  width: 280px; /* เพิ่มความกว้าง sidebar */
+  background: linear-gradient(to bottom, #007bff, #0056b3); /* ไล่สีน้ำเงินสวยๆ */
+  color: white;
+  padding-top: 25px; /* เพิ่ม padding */
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2); /* เงาที่ชัดเจนขึ้น */
+  position: fixed;
+  top: 75px; /* ใต้ header (ปรับให้ตรงกับความสูง header ใหม่) */
+  bottom: 20px;
+  left: 0;
+  z-index: 999; /* Sidebar อยู่ใต้ Header เล็กน้อย */
+  overflow-y: auto;
+  transition: transform 0.4s ease-in-out, width 0.4s ease-in-out;
+  border-top-right-radius: 15px; /* ขอบมนด้านบนขวา */
+  border-bottom-right-radius: 15px; /* ขอบมนด้านล่างขวา */
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 8px; /* เพิ่มระยะห่าง */
+}
+
+.sidebar li a,
+.sidebar .toggle-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 25px; /* เพิ่ม padding */
+  color: white;
+  text-decoration: none;
+  font-size: 1.05rem; /* เพิ่มขนาด font */
+  font-weight: 500;
+  border-radius: 8px; /* ขอบโค้งมน */
+  transition: background-color 0.3s ease, padding-left 0.3s ease;
+  gap: 12px; /* เพิ่มระยะห่างไอคอนกับข้อความ */
+}
+
+.sidebar li a i,
+.sidebar .toggle-header i {
+  font-size: 1.2rem; /* เพิ่มขนาดไอคอน */
+  width: 25px; /* กำหนดความกว้างเพื่อจัดแนวไอคอน */
+  text-align: center;
+}
+
+.sidebar li a:hover {
+  background-color: rgba(255, 255, 255, 0.3); /* พื้นหลังโปร่งแสงมากขึ้นเมื่อ hover */
+  padding-left: 30px; /* เพิ่ม padding เมื่อ hover */
+  box-shadow: inset 3px 0 0 #fff; /* เพิ่มเส้นสีขาวด้านซ้าย */
+}
+
+.sidebar .toggle-header {
+  background-color: rgba(0, 0, 0, 0.25); /* สีเข้มขึ้น */
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 15px; /* เพิ่ม margin */
+  border-top-left-radius: 0; /* ลบขอบมนด้านบนซ้าย */
+  border-bottom-left-radius: 0; /* ลบขอบมนด้านล่างซ้าย */
+}
+
+.sidebar .toggle-header:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.sidebar .submenu {
+  list-style: none;
+  padding: 5px 0 5px 0; /* ปรับ padding */
+  margin: 0;
+  background-color: rgba(0, 0, 0, 0.15); /* สีเข้มขึ้น */
+  border-radius: 0 0 10px 10px; /* ขอบโค้งมนด้านล่าง */
+  overflow: hidden;
+}
+
+.sidebar .submenu li a {
+  padding: 10px 20px 10px 55px; /* เพิ่ม padding ซ้ายสำหรับ submenu */
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.9); /* สีสว่างขึ้น */
+}
+
+.sidebar .submenu li a:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding-left: 60px;
+  color: white;
+}
+
+.menu-toggle-icon {
+  margin-left: auto;
+  font-size: 0.9em;
+  transition: transform 0.3s ease;
+}
+
+/* --- Main Content Area --- */
+#contentArea {
+  flex-grow: 1;
+  padding-top: 85px !important;
+  padding: 30px; /* เพิ่ม padding */
+  margin-left: 280px; /* เว้นที่ให้ sidebar (ปรับตามความกว้าง sidebar ใหม่) */
+  background-color: #f8f9fa;
+  border-radius: 10px; /* ขอบโค้งมน */
+  min-height: calc(100vh - 80px); /* ปรับตามความสูง header ใหม่ */
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.08); /* เงาด้านใน */
+  transition: margin-left 0.4s ease-in-out;
+}
+
+/* ถ้า sidebar ถูกย่อ (จาก JS) */
+#contentArea.shifted {
+  margin-left: 0; /* หรือปรับตามต้องการ */
+}
+
+.content-page {
+  background-color: white;
+  padding: 30px; /* เพิ่ม padding */
+  border-radius: 12px; /* ขอบโค้งมน */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* เงาที่ชัดเจนขึ้น */
+  margin-bottom: 30px; /* เพิ่ม margin */
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease;
+}
+
+.content-page:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.content-page h2 {
+  color: #007bff;
+  margin-top: 0;
+  margin-bottom: 25px; /* เพิ่ม margin */
+  font-size: 2rem; /* เพิ่มขนาดหัวข้อ */
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px; /* ระยะห่างไอคอนกับข้อความ */
+  border-bottom: 2px solid #e0e6eb; /* เพิ่มเส้นใต้หัวข้อ */
+  padding-bottom: 15px; /* เพิ่ม padding ใต้หัวข้อ */
+}
+
+/* --- Table Styles --- */
+.table-responsive {
+  overflow-x: auto;
+  margin-top: 25px; /* เพิ่ม margin */
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px; /* ขอบมน */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* เพิ่มเงา */
+  background-color: white; /* เพื่อให้เงาแสดงผลชัดเจน */
+}
+
+table {
+  margin-bottom: 10px !important;
+  width: 96%;
+  margin-left: 20px !important;
+  margin-right: 20px !important;
+  border-collapse: separate; /* ใช้ separate เพื่อให้ border-radius ทำงานกับ table */
+  border-spacing: 0; /* ลบช่องว่างระหว่าง cell */
+  margin-bottom: 0; /* ลบ margin เดิม */
+  background-color: white;
+  border-radius: 10px; /* ขอบโค้งมน */
+  overflow: hidden; /* สำคัญเพื่อให้ border-radius ทำงานกับเนื้อหาภายใน */
+}
+
+th, td {
+  padding: 15px 20px; /* เพิ่ม padding */
+  border-bottom: 1px solid #eef1f4; /* สีเส้นแบ่งอ่อนลง */
+  text-align: left;
+}
+
+th {
+  background-color: #f5f8fb; /* สีพื้นหลัง header ที่อ่อนลง */
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  font-size: 0.95rem; /* เพิ่มขนาด font */
+  border-top: 1px solid #eef1f4;
+}
+
+/* กำหนดขอบโค้งมนสำหรับ header cells */
+table thead tr:first-child th:first-child { border-top-left-radius: 10px; }
+table thead tr:first-child th:last-child { border-top-right-radius: 10px; }
+
+tbody tr:nth-child(even) {
+  background-color: #fbfdff; /* สีสลับแถวที่อ่อนลง */
+}
+
+tbody tr:hover {
+  background-color: #e6f7ff; /* สีไฮไลท์เมื่อ hover สว่างขึ้น */
+  cursor: pointer;
+}
+
+/* ลบเส้นขอบด้านล่างของแถวสุดท้าย */
+tbody tr:last-child td {
+  border-bottom: none;
+}
+/* กำหนดขอบโค้งมนสำหรับ footer cells (ถ้ามี) */
+table tfoot tr:last-child td:first-child { border-bottom-left-radius: 10px; }
+table tfoot tr:last-child td:last-child { border-bottom-right-radius: 10px; }
+
+
+/* --- Responsive Adjustments (Mobile First) --- */
+@media (max-width: 768px) {
+  /* Header Bar */
+  .แถบบน {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 15px;
+    height: auto;
+    position: relative;
+    padding-bottom: 15px; /* เพิ่ม padding ด้านล่างเมื่อเป็น column */
+  }
+
+  .แถบบน .loin {
+    margin-bottom: 10px;
+    align-self: center;
+    height: 35px; /* ลดขนาดโลโก้บนมือถือ */
+    width: 35px;
+  }
+
+  .แถบบน .หัวข้อ {
+    font-size: 1.1rem;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .แถบบน .menu-btn, .แถบบน .logout-btn {
+    margin-left: 0;
+    margin-top: 8px; /* เพิ่ม margin */
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  /* Login Page Specifics on Mobile */
+  .login-container {
+    width: 95%; /* กว้างขึ้นบนมือถือ */
+    max-width: 380px; /* จำกัด max-width */
+    padding: 25px 20px; /* ลด padding */
+  }
+
+  .login-container h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="number"],
+  select {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 12px 20px;
+  }
+
+  /* App Content & Sidebar */
+  .app-content {
+    flex-direction: column;
+    padding-top: 10px; /* ลด padding-top */
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding-top: 10px;
+    border-radius: 0; /* ลบขอบมนบนมือถือ */
+    box-shadow: none;
+    border-bottom: 1px solid #e0e0e0;
+    transform: translateX(-100%);
+  }
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .sidebar ul {
+    flex-direction: column; /* ให้เมนูกลับมาเป็นคอลัมน์บนมือถือ */
+    align-items: flex-start; /* จัดชิดซ้าย */
+  }
+  .sidebar li {
+    width: 100%; /* เต็มความกว้าง */
+    margin: 0;
+  }
+  .sidebar li a,
+  .sidebar .toggle-header {
+    text-align: left; /* จัดชิดซ้าย */
+    padding: 12px 15px;
+    border-radius: 0; /* ลบขอบมน */
+    flex-direction: row; /* ไอคอนอยู่ข้างข้อความ */
+    gap: 10px;
+  }
+  .sidebar li a i, .sidebar .toggle-header i {
+      font-size: 1.1rem;
+      width: 20px;
+  }
+  .sidebar li a span, .sidebar .toggle-header span {
+      font-size: 1rem;
+  }
+
+ 
+
+  #contentArea {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .content-page {
+    padding: 20px;
+  }
+
+  .content-page h2 {
+    font-size: 1.5rem;
+    padding-bottom: 10px;
+  }
+
+  .table-responsive {
+    margin-top: 15px;
+  }
+  table th, table td {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  table thead tr:first-child th:first-child,
+  table thead tr:first-child th:last-child {
+      border-radius: 0; /* ลบขอบมนบนมือถือ */
+  }
+}
+
+/* Tablet Adjustments (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .แถบบน {
+    padding: 15px 25px;
+  }
+  .แถบบน .หัวข้อ {
+    font-size: 1.4rem;
+  }
+
+  .app-content {
+    padding-top: 75px;
+  }
+
+  .sidebar {
+    width: 220px; /* Sidebar เล็กลงหน่อย */
+    top: 70px;
+    padding-top: 20px;
+  }
+
+  #contentArea {
+    margin-left: 220px;
+    padding: 25px;
+    min-height: calc(100vh - 75px);
+  }
+
+  .login-container {
+    padding: 35px;
+  }
+}
+
+.s123 {
+  margin-left: 20px !important;
+}
+
+.ss123 {
+  margin-top: 15px !important;
+}
+
+/* ถ้าคุณมี .navbar-right ที่ครอบปุ่มอยู่ อาจต้องการ CSS นี้ด้วย */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* ระยะห่างระหว่างปุ่มต่างๆ ถ้ามี */
+}
+
+/* Styling สำหรับปุ่มออกจากระบบ */
+.logout-btn {
+  background-color: #dc3545; /* สีแดงสำหรับปุ่มออกจากระบบ */
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  display: flex; /* เพื่อจัดไอคอนและข้อความให้อยู่บรรทัดเดียวกัน */
+  align-items: center;
+  gap: 8px; /* ระยะห่างระหว่างไอคอนกับข้อความ */
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* เพิ่ม transition */
+}
+
+.logout-btn:hover {
+  background-color: #c82333; /* สีแดงเข้มขึ้นเมื่อชี้ */
+  transform: translateY(-3px); /* เลื่อนขึ้น 3px เมื่อชี้ */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* เพิ่มเงา */
+}
+
+.logout-btn .fas {
+  font-size: 1.1em; /* ขนาดไอคอน */
+}
+
+/* ถ้าคุณมี .navbar-right ที่ครอบปุ่มอยู่ อาจต้องการ CSS นี้ด้วย */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* ระยะห่างระหว่างปุ่มต่างๆ ถ้ามี */
+}
+
+/* --- ส่วนสำหรับ Menu Dropdown ใน Navbar --- */
+/* เพิ่มคลาส .menu-container เพื่อควบคุมการวางตำแหน่งของ dropdown */
+.menu-container {
+  position: relative; /* สำคัญ: เพื่อให้ dropdown วางตัวสัมพันธ์กับ container นี้ */
+  display: inline-block; /* ทำให้ container ไม่กินพื้นที่เต็มบรรทัด */
+}
+
+/* เพิ่มคลาสสำหรับ dropdown menu ที่จะแสดงปุ่มออกจากระบบ */
+.user-dropdown-menu {
+  display: none; /* ซ่อนเมนูย่อยเริ่มต้น */
+  position: absolute;
+  background-color: #f9f9f9; /* สีพื้นหลังของ dropdown */
+  min-width: 160px; /* ความกว้างขั้นต่ำของ dropdown */
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); /* เงาของ dropdown */
+  z-index: 1; /* ให้ dropdown อยู่เหนือองค์ประกอบอื่น */
+  right: 0; /* จัดให้อยู่ชิดขวาของปุ่มเมนู */
+  top: 100%; /* อยู่ใต้ปุ่มเมนูพอดี */
+  border-radius: 5px;
+  overflow: hidden; /* เพื่อให้ border-radius ทำงานกับปุ่มด้านใน */
+  margin-top: 5px; /* ระยะห่างจากปุ่มเมนู */
+}
+
+.user-dropdown-menu.show {
+  display: block; /* แสดงเมื่อมีคลาส show โดย JavaScript */
+}
+
+/* ปรับสไตล์ของปุ่มเมนูหลัก (เพื่อให้แสดงตลอด) */
+.menu-btn {
+background-color: #007bff; /* สีน้ำเงิน */
+color: white;
+border: none;
+padding: 8px 15px;
+border-radius: 5px;
+cursor: pointer;
+font-size: 1em;
+display: flex; /* เพื่อจัดไอคอนและข้อความให้อยู่บรรทัดเดียวกัน */
+align-items: center;
+gap: 8px;
+transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-btn:hover {
+background-color: #0056b3; /* สีน้ำเงินเข้มขึ้น */
+transform: translateY(-3px);
+box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* ลบกฎ CSS นี้ออก หรือคอมเมนต์ทิ้งไป */
+/*
+.admin-menu-btn, .user-menu-btn {
+display: none;
+}
+*/
+
+/* ปรับสไตล์ปุ่ม Logout ที่อยู่ใน dropdown */
+.user-dropdown-menu .logout-btn {
+  margin-left: 0px !important;
+  width: 100%;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  /* *** แก้ไขตรงนี้: เปลี่ยนเป็น border-radius: 5px; หรือ 8px; ตามที่คุณต้องการให้มันโค้งมน *** */
+  border-radius: 5px; /* หรือใช้ 8px ถ้าคุณต้องการความโค้งมนที่ชัดเจนกว่า */
+  text-align: left;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* *** เพิ่ม transition ให้ครอบคลุม transform และ box-shadow ด้วย (แม้ว่าเราจะเซ็ตเป็น none แล้วก็ตาม) *** */
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect สำหรับปุ่มออกจากระบบใน dropdown */
+.user-dropdown-menu .logout-btn:hover {
+  background-color: #c82333; /* สีแดงเข้มขึ้นเมื่อโฮเวอร์ */
+  transform: none; /* *** ต้องแน่ใจว่ามันคือ none เพื่อยกเลิกการเลื่อนขึ้น *** */
+  box-shadow: none; /* *** ต้องแน่ใจว่ามันคือ none เพื่อยกเลิกเงา *** */
+}
+
+/* Rule ของ .logout-btn ทั่วไป (ควรอยู่ก่อน Rule ที่เฉพาะเจาะจงกว่า) */
+.logout-btn {
+background-color: #dc3545; /* สีแดงสำหรับปุ่มออกจากระบบ */
+color: white;
+border: none;
+padding: 8px 15px;
+border-radius: 5px;
+cursor: pointer;
+font-size: 1em;
+display: flex; /* เพื่อจัดไอคอนและข้อความให้อยู่บรรทัดเดียวกัน */
+align-items: center;
+gap: 8px;
+transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logout-btn:hover {
+background-color: #c82333; /* สีแดงเข้มขึ้น */
+transform: translateY(-3px);
+box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* แก้ไข .user-dropdown-menu ที่มีอยู่แล้ว */
+.user-dropdown-menu {
+  margin-top: 0px !important;
+  display: block; /* เปลี่ยนจาก 'none' เป็น 'block' เพื่อให้ transition ทำงาน */
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1001; /* ให้อยู่เหนือองค์ประกอบอื่นๆ */
+  right: 0; /* จัดให้อยู่ชิดขวาของปุ่มเมนู */
+  top: 100%; /* อยู่ใต้ปุ่มเมนูพอดี */
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+  
+  /* --- เพิ่ม/แก้ไขส่วนนี้สำหรับ Animation --- */
+  opacity: 0; /* ซ่อนเริ่มต้นด้วย opacity */
+  transform: translateX(100%); /* เลื่อนไปทางขวาเริ่มต้น (ซ่อน) */
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* เพิ่ม transition */
+  pointer-events: none; /* ทำให้คลิกผ่านได้เมื่อซ่อนอยู่ */
+  white-space: nowrap; /* ป้องกันข้อความห่อหุ้มใน dropdown */
+}
+
+/* เพิ่มคลาส .show สำหรับสถานะที่แสดง */
+.user-dropdown-menu.show {
+  margin-top: 0px !important;
+ right: 20px !important;
+  opacity: 1; /* แสดงด้วย opacity เต็มที่ */
+  transform: translateX(0); /* เลื่อนกลับมาตำแหน่งเดิม (แสดง) */
+  pointer-events: all; /* ทำให้คลิกได้เมื่อแสดง */
+}
+
+/* ส่วนที่เหลือของ CSS ยังคงเหมือนเดิม */
+/* .user-dropdown-menu .logout-btn ฯลฯ */
+
+.ous {
+  margin-left: 0px !important;
+  width: 91px !important;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 0;
+  text-align: left;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+.ous:hover {
+  background-color: #d10202; /* *** สีพื้นหลังเข้มขึ้นเมื่อโฮเวอร์ *** */
+  /* color: #d3d3d3; สีข้อความอาจจะเข้มขึ้นด้วย */
+  cursor: pointer;
+}
+
+.lo1 {
+  width: 190px;
+  height: 190px;
+}
+
+/* สไตล์สำหรับปุ่ม "ล้างข้อมูลทั้งหมด" ใน dropdown */
+.user-dropdown-menu .clear-all-data-btn {
+  margin-left: 0px !important;
+  /* margin-left: 0px !important;  ถ้าไม่จำเป็น ให้ลบออก */
+  width: 100%;
+  background-color: #ffc107;
+  color: #343a40;
+  border: none;
+  padding: 10px 15px;
+  /* *** แก้ไขตรงนี้: เปลี่ยนเป็น border-radius: 5px; หรือ 8px; ตามที่คุณต้องการ *** */
+  border-radius: 5px; /* หรือ 8px */
+  text-align: left;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* *** เพิ่ม transition ให้ครอบคลุม transform และ box-shadow ด้วย *** */
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.user-dropdown-menu .clear-all-data-btn:hover {
+  background-color: #e0a800; /* สีเหลืองเข้มขึ้นเมื่อโฮเวอร์ */
+  transform: none; /* *** ต้องแน่ใจว่ามันคือ none เพื่อยกเลิกการเลื่อนขึ้น *** */
+  box-shadow: none; /* *** ต้องแน่ใจว่ามันคือ none เพื่อยกเลิกเงา *** */
+}
+
+/* สไตล์สำหรับลิงก์ "ลืมรหัสผ่านติดต่อ" ในหน้า Login */
+.ล {
+  display: block; /* ทำให้ลิงก์อยู่บรรทัดใหม่ */
+  margin-top: 15px; /* เพิ่มระยะห่างด้านบน */
+  font-size: 0.95em; /* ปรับขนาดตัวอักษรให้เล็กลงเล็กน้อย */
+  color: #007bff; /* สีน้ำเงินมาตรฐานสำหรับลิงก์ */
+  text-align: center; /* จัดให้อยู่กึ่งกลาง */
+  text-decoration: underline; /* เพิ่มเส้นใต้ (หรือจะลบออกถ้าไม่ต้องการ) */
+  transition: color 0.3s ease;
+}
+
+.ล {
+  margin-top: 20px !important;
+  color: #0056b3; /* เปลี่ยนสีเมื่อ hover */
+  text-decoration: none;
+}
