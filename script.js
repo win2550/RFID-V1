@@ -115,12 +115,13 @@ let classData = {
 
 // User authentication data
 const users = {
-  'winphethai@gmail.com': { password: '123', role: 'admin' },
-  '1': { password: '1', role: 'shop', shopId: 1 },
-  '2': { password: '2', role: 'shop', shopId: 2 },
-  '3': { password: '3', role: 'shop', shopId: 3 }
+  'admin@gmail.com': { password: 'admin_123', role: 'admin' },
+  'shop1@gmail.com': { password: 'cellshop_1', role: 'shop', shopId: 1 },
+  'shop2@gmail.com': { password: 'cellshop_2', role: 'shop', shopId: 2 },
+  'shop3@gmail.com': { password: 'cellshop_3', role: 'shop', shopId: 3 }
   // เพิ่มร้านค้าอื่นๆ ได้ที่นี่
 };
+
 
 let currentUserRole = null;
 let currentShopId = null;
