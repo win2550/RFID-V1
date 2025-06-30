@@ -495,40 +495,37 @@ function dailyClearData() {
   const todayKey = formatDate(now); // YYYY-MM-DD
 
   if (todayData.length > 0) {
-    // ✅ บันทึกข้อมูล todayData ไปยัง historicalData[วันนี้]
+    // ✅ เก็บ todayData ลง historicalData
     if (!historicalData[todayKey]) {
       historicalData[todayKey] = [];
     }
     historicalData[todayKey].push(...todayData);
-
     localStorage.setItem('historicalData', JSON.stringify(historicalData));
     console.log(`Saved ${todayData.length} records to historicalData[${todayKey}]`);
-
-    // ✅ ล้างข้อมูล todayData
-    todayData = [];
-    localStorage.setItem('todayData', JSON.stringify(todayData));
-    console.log(`todayData cleared for ${todayKey}`);
-
-    // ✅ ลบข้อมูลร้านค้า (useData1, useData2, useData3)
-    for (let i = 1; i <= 3; i++) {
-      localStorage.removeItem(`useData${i}`);
-    }
-    console.log(`Cleared useData1–3 from localStorage.`);
-
-    // ✅ อัปเดตหน้าจอหาก admin กำลังดู
-    if (currentUserRole === 'admin') {
-      renderTodayTable(); // ตารางวันนี้ → ว่าง
-      for (const className in classData) {
-        updateClassTable(className);
-      }
-      updateSummaryAllView(); // สถิติย้อนหลัง → รวมข้อมูลใหม่
-    }
-  } else {
-    console.log('No data in todayData to clear.');
   }
 
-  cleanOldHistoricalData(); // ลบข้อมูลย้อนหลังเกิน 7 วัน
-  scheduleDailyClear(); // ตั้งเวลาใหม่สำหรับวันถัดไป
+  // ✅ ล้าง todayData
+  todayData = [];
+  localStorage.setItem('todayData', JSON.stringify(todayData));
+  console.log(`todayData cleared for ${todayKey}`);
+
+  // ✅ ลบข้อมูลร้านค้า useData1–3
+  for (let i = 1; i <= 3; i++) {
+    localStorage.removeItem(`useData${i}`);
+    console.log(`Removed useData${i} from localStorage`);
+  }
+
+  // ✅ อัปเดตหน้าจอถ้า admin กำลังดู
+  if (currentUserRole === 'admin') {
+    renderTodayTable();
+    for (const className in classData) {
+      updateClassTable(className);
+    }
+    updateSummaryAllView();
+  }
+
+  cleanOldHistoricalData(); // ลบย้อนหลังเกิน 1 ปี
+  scheduleDailyClear();     // ตั้งใหม่สำหรับวันถัดไป
 }
 
 
@@ -746,7 +743,7 @@ function handleUseSubmit(e, shopNumber) {
   const currentHour = now.getHours();
 
   // ✅ จำกัดเวลาใช้งานคูปอง
-  if (currentHour < 0 || currentHour >= 23.29) {
+  if (currentHour < 7 || currentHour >= 16) {
     alert('สามารถบันทึกการใช้คูปองได้ตั้งแต่เวลา 07:00 น. ถึง 16:00 น. เท่านั้น');
     idInput.value = '';
     idInput.focus();
