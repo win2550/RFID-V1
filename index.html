@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบข้อมูลการใช้คูปอง</title>
+  <link rel="stylesheet" href="main.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+  <body>
+    <div id="login-page" class="page active">
+      <img src="รูป.รร.ชัด v2.jpeg" id="login-page" class="pageactive" alt="">
+        <div class="login-container">
+          <img src="logo1.png" class="lo1" alt="">
+          <h2>เข้าสู่ระบบ</h2>
+          <input type="email" id="login-email" placeholder="อีเมล" required>
+          <input type="password" id="login-password" placeholder="รหัสผ่าน" required>
+          <button id="login-button" class="login" onclick="handleLogin()">เข้าสู่ระบบ</button>
+          <p id="login-error" style="display: none;"></p>
+          <a class="ล" href="https://www.instagram.com/pxethxi_wxn/profilecard/?igsh=NDhscXg0bXl1ZG1w"> ลืมรหัสผ่านติดต่อ</a>
+        </div>
+    </div>
+
+    <div id="main-app-page" class="page">
+      <div class="แถบบน">
+        <img class="loin" src="logo1.png" alt="โรงเรียนแม่สะเรียง">
+        <h3 class="หัวข้อ">ข้อมูลการใช้คูปองของนักเรียนโรงเรียนแม่สะเรียง"บริพัตรศึกษา"</h3>
+        <div class="navbar-right">
+          <div class="menu-container">
+              <button class="menu-btn" onclick="toggleUserMenu()">
+                <i class="fas fa-bars menu-icon"></i>
+                <span>เมนู</span>
+              </button>
+              <div id="user-dropdown-menu" class="user-dropdown-menu">
+                  <button class="logout-btn" onclick="logout()">
+                      <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                  </button>
+                  <button class="menu-item clear-all-data-btn" onclick="clearAllDataManually()">
+                    <i class="fas fa-trash-alt"></i> ล้างข้อมูลทั้งหมด
+                  </button>
+              </div>
+          </div>
+          </div>
+      </div>
+  
+      <div class="sidebar">
+        <ul>
+          <li><a href="#" onclick="switchView('home-main')">เพิ่มเงิน</a></li>
+          <li><a href="#" onclick="switchView('home-main2')">เพิ่มลบ</a></li>
+          <li><a href="#" onclick="switchView('today')">สถิติวันนี้</a></li>
+          <li>
+            <div class="toggle-header" onclick="toggleMainMenu()">
+              <i class="fas fa-users"></i>
+              <strong>รายชื่อ</strong>
+              <span id="mainMenuIcon">▼</span>
+            </div>
+            <ul class="submenu" id="mainSubmenu">
+              <li>
+                <li><a href="#"  onclick="switchView('m11')">รายงาน</a></li>
+              <li>
+            </ul>
+          </li>
+          <li>
+            <div class="toggle-header" onclick="toggleShopSubmenu()">
+              <i class="fas fa-store"></i>
+              <strong>ร้านค้า</strong>
+              <span id="shopMenuIcon">▼</span>
+            </div>
+            <ul class="submenu" id="shopSubmenu">
+              <li><a href="#" onclick="showShopAdminTable(1)">ร้านค้า 1</a></li>
+              <li><a href="#" onclick="showShopAdminTable(2)">ร้านค้า 2</a></li>
+              <li><a href="#" onclick="showShopAdminTable(3)">ร้านค้า 3</a></li>
+            </ul>
+          </li>      
+          <li>
+            <div class="toggle-header" onclick="toggleSummarySubmenu()">
+              <i class="fas fa-chart-line"></i>
+              <strong>สถิติย้อนหลัง</strong>
+              <span id="summaryMenuIcon">▼</span>
+            </div>
+            <ul class="submenu" id="summarySubmenu">
+              
+              <!-- ตัวทดลอง 30 รายชื่อ -->
+              <li>
+                <div class="toggle-header" onclick="toggleSubSummaryMenu('studentSummarySubmenu')">
+                  <strong>รายงาน</strong>
+                  <span id="studentSummarySubmenuIcon">▼</span>
+                </div>
+                <ul class="submenu" id="studentSummarySubmenu">
+                  <li><a href="#" onclick="switchView('summary-m11-daily')">รายวัน</a></li>
+                  <li><a href="#" onclick="switchView('summary-m11-weekly')">รายสัปดาห์</a></li>
+                  <li><a href="#" onclick="switchView('summary-m11-monthly')">รายเดือน</a></li>
+                  <li><a href="#" onclick="switchView('summary-m11-semester')">รายเทอม</a></li>
+                  <li><a href="#" onclick="switchView('summary-m11-yearly')">รายปี</a></li>
+                </ul>
+              </li>
+          
+              <!-- ร้านค้า -->
+              <li>
+                <div class="toggle-header" onclick="toggleSubSummaryMenu('shopSummarySubmenu')">
+                  <strong>ร้านค้า</strong>
+                  <span id="shopSummarySubmenuIcon">▼</span>
+                </div>
+                <ul class="submenu" id="shopSummarySubmenu">
+          
+                  <!-- ร้านค้า 1 -->
+                  <li>
+                    <div class="toggle-header" onclick="toggleSubSummaryMenu('shop1Summary')">
+                      ร้านค้า 1
+                      <span id="shop1SummaryIcon">▼</span>
+                    </div>
+                    <ul class="submenu" id="shop1Summary">
+                      <li><a href="#" onclick="switchView('summary-shop1-daily')">รายวัน</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop1-weekly')">รายสัปดาห์</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop1-monthly')">รายเดือน</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop1-semester')">รายเทอม</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop1-yearly')">รายปี</a></li>
+                    </ul>
+                  </li>
+          
+                  <!-- ร้านค้า 2 -->
+                  <li>
+                    <div class="toggle-header" onclick="toggleSubSummaryMenu('shop2Summary')">
+                      ร้านค้า 2
+                      <span id="shop2SummaryIcon">▼</span>
+                    </div>
+                    <ul class="submenu" id="shop2Summary">
+                      <li><a href="#" onclick="switchView('summary-shop2-daily')">รายวัน</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop2-weekly')">รายสัปดาห์</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop2-monthly')">รายเดือน</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop2-semester')">รายเทอม</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop2-yearly')">รายปี</a></li>
+                    </ul>
+                  </li>
+          
+                  <!-- ร้านค้า 3 -->
+                  <li>
+                    <div class="toggle-header" onclick="toggleSubSummaryMenu('shop3Summary')">
+                      ร้านค้า 3
+                      <span id="shop3SummaryIcon">▼</span>
+                    </div>
+                    <ul class="submenu" id="shop3Summary">
+                      <li><a href="#" onclick="switchView('summary-shop3-daily')">รายวัน</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop3-weekly')">รายสัปดาห์</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop3-monthly')">รายเดือน</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop3-semester')">รายเทอม</a></li>
+                      <li><a href="#" onclick="switchView('summary-shop3-yearly')">รายปี</a></li>
+                    </ul>
+                  </li>
+          
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+  
+      <div id="contentArea">
+        <div id="view-home-main" class="view" style="display: block;">
+          <!-- <div id="contentArea"></div> -->
+          <h2>เติมเงินคูปองให้นักเรียน</h2>
+            <label for="student-id">รหัสนักเรียน:</label>
+            <input type="text" id="student-id" placeholder="เช่น 12345"><br><br>
+            <label for="amount-topup">จำนวนเงินที่เติม:</label>
+            <input type="number" id="amount-topup" placeholder="เช่น 50"><br><br>
+            <button onclick="topUpCoupon()">เติมเงิน</button>
+            <p id="topup-message"></p>
+        </div>
+        <div id="view-home-main2" class="view" style="display: block;">
+          <h2>ลบเงินคูปองของนักเรียน</h2>
+            <form id="deduct-form">
+              <label for="deduct-student-id">รหัสนักเรียน:</label>
+              <input type="text" id="deduct-student-id" placeholder="เช่น 12345" required><br><br>
+              <label for="deduct-amount">จำนวนเงินที่ต้องการลบ:</label>
+              <input type="number" id="deduct-amount" placeholder="เช่น 20" required><br><br>
+              <button type="submit">ลบเงิน</button>
+            </form>
+            <p id="deduct-message"></p>
+        </div>
+
+        <div id="view-today" class="view">
+          <h3>สถิติวันนี้</h3>
+          <p id="today-total-used" style="font-weight: bold; color: #d35400;"></p> <!-- ✅ เพิ่ม -->
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th></tr>
+            </thead>
+            <tbody id="today-body"></tbody>
+          </table>
+        </div>
+
+
+
+        <!-- ---------------------------------------------ตางรางในช่องตามลำดับชั้น--------------------------------------------- -->
+        <!-- --------------------------------------------------ม.1/1-12---------------------------------------------------- -->
+        <div id="view-m11" class="view">
+          <h3>รายชื่อ</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>คงเหลือ</th><th>ใช้เงิน</th></tr>
+            </thead>
+            <tbody id="m11-body"></tbody>
+          </table>
+        </div>
+        
+
+        <!-- --------------------------------------------------ม.6/2-12---------------------------------------------------- -->
+        <!-- ---------------------------------------------ตางรางในช่องตามลำดับชั้น--------------------------------------------- -->
+
+        <!-- ---------------------------------------------ตารางสำหรับสถิติย้อนหลัง--------------------------------------------- -->
+        <!-- ----------------------------------------------------รายชื่อ---------------------------------------------------- -->
+
+        <!-- ตัวทดลอง 30 รายชื่อ -->
+        <div id="view-summary-m11-daily" class="view summary-class-view">
+          <h3>รายงาน - รายวัน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-m11-daily-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-m11-weekly" class="view summary-class-view">
+          <h3>รายงาน - รายสัปดาห์</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-m11-weekly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-m11-monthly" class="view summary-class-view">
+          <h3>รายงาน - รายเดือน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-m11-monthly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-m11-semester" class="view summary-class-view">
+          <h3>รายงาน - รายเทอม</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-m11-semester-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-m11-yearly" class="view summary-class-view">
+          <h3>รายงาน - รายปี</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-m11-yearly-body"></tbody>
+          </table>
+        </div>
+
+        <!-- ----------------------------------------------------รายชื่อ---------------------------------------------------- -->
+        <!-- ---------------------------------------------ตารางสำหรับสถิติย้อนหลัง--------------------------------------------- -->
+        
+        <!-- ---------------------------------------------ตารางสำหรับสถิติย้อนหลัง--------------------------------------------- -->
+        <!-- ----------------------------------------------------ร้านค้า---------------------------------------------------- -->
+
+        <!-- ร้านค้า 1 -->
+        <div id="view-summary-shop1-daily" class="view summary-class-view">
+          <h3>ร้านค้า 1 - รายวัน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop1-daily-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop1-weekly" class="view summary-class-view">
+          <h3>ร้านค้า 1 - รายสัปดาห์</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop1-weekly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop1-monthly" class="view summary-class-view">
+          <h3>ร้านค้า 1 - รายเดือน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop1-monthly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop1-semester" class="view summary-class-view">
+          <h3>ร้านค้า 1 - รายเทอม</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop1-semester-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop1-yearly" class="view summary-class-view">
+          <h3>ร้านค้า 1 - รายปี</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop1-yearly-body"></tbody>
+          </table>
+        </div>
+
+        <!-- ร้านค้า 2 -->
+        <div id="view-summary-shop2-daily" class="view summary-class-view">
+          <h3>ร้านค้า 2 - รายวัน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop2-daily-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop2-weekly" class="view summary-class-view">
+          <h3>ร้านค้า 2 - รายสัปดาห์</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop2-weekly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop2-monthly" class="view summary-class-view">
+          <h3>ร้านค้า 2 - รายเดือน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop2-monthly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop2-semester" class="view summary-class-view">
+          <h3>ร้านค้า 2 - รายเทอม</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop2-semester-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop2-yearly" class="view summary-class-view">
+          <h3>ร้านค้า 2 - รายปี</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop2-yearly-body"></tbody>
+          </table>
+        </div>
+
+        <!-- ร้านค้า 3 -->
+        <div id="view-summary-shop3-daily" class="view summary-class-view">
+          <h3>ร้านค้า 3 - รายวัน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop3-daily-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop3-weekly" class="view summary-class-view">
+          <h3>ร้านค้า 3 - รายสัปดาห์</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop3-weekly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop3-monthly" class="view summary-class-view">
+          <h3>ร้านค้า 3 - รายเดือน</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop3-monthly-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop3-semester" class="view summary-class-view">
+          <h3>ร้านค้า 3 - รายเทอม</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop3-semester-body"></tbody>
+          </table>
+        </div>
+
+        <div id="view-summary-shop3-yearly" class="view summary-class-view">
+          <h3>ร้านค้า 3 - รายปี</h3>
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>คงเหลือ</th><th>ใช้เงิน</th><th>เวลา</th><th>วันที่</th></tr>
+            </thead>
+            <tbody id="summary-shop3-yearly-body"></tbody>
+          </table>
+        </div>
+
+
+        <!-- ----------------------------------------------------ร้านค้า---------------------------------------------------- -->
+        <!-- ---------------------------------------------ตารางสำหรับสถิติย้อนหลัง--------------------------------------------- -->
+        
+
+        <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+        <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+
+        <div id="view-shop1-admin" class="view shop-admin-view">
+          <h3>ข้อมูลการใช้คูปองของร้านค้า 1</h3>
+          <p id="shop1-total-used" style="font-weight: bold; color: #d35400;"></p> <!-- ✅ เพิ่ม -->
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th>
+              </thead></tr>
+            </thead>
+            <tbody id="shop1-admin-body"></tbody>
+          </table>
+        </div>
+        <div id="view-shop2-admin" class="view shop-admin-view">
+          <h3>ข้อมูลการใช้คูปองของร้านค้า 2</h3>
+          <p id="shop2-total-used" style="font-weight: bold; color: #d35400;"></p> <!-- ✅ เพิ่ม -->
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th>
+              </thead></tr>
+            <tbody id="shop2-admin-body"></tbody>
+          </table>
+        </div>
+        <div id="view-shop3-admin" class="view shop-admin-view">
+          <h3>ข้อมูลการใช้คูปองของร้านค้า 3</h3>
+          <p id="shop3-total-used" style="font-weight: bold; color: #d35400;"></p> <!-- ✅ เพิ่ม -->
+          <table>
+            <thead>
+              <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th>
+              </thead></tr>
+            </thead>
+            <tbody id="shop3-admin-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+    <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+
+
+    <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+    <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+
+    <div id="use-page" class="page">
+      <div class="แถบบน">
+        <img class="loin" src="logo1.png" alt="โรงเรียนแม่สะเรียง">
+        <h3 class="หัวข้อ" id="use-page-header"></h3> <div id="current-datetime" style="font-size: 1.2em; color: #000000; margin-left: auto; margin-right: 20px;"></div>
+       <div class="menu-dropdown" id="shopMenuDropdown">
+          <a href="#" class="ous" onclick="logout()">ออกจากระบบ</a>
+        </div>
+      </div>
+
+    <div id="view-use1-shop" class="view use-view">
+      <h3>ร้านค้า 1: บันทึกการใช้คูปอง</h3>
+      <p id="use1-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p> <!-- ✅ เพิ่ม -->
+      <form id="use1-form" class="shop-form">
+        <input type="text" id="use1-id" class="s123" placeholder="รหัส ID นักเรียน" required>
+        <button type="submit">บันทึกการใช้</button>
+      </form>
+      <div class="amount-control">
+        <button type="button" class="B1" onclick="changeAmount('use1', -5)">-5</button>
+        <span id="use1-amount">5</span>
+        <button type="button" class="B2" onclick="changeAmount('use1', 5)">+5</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th></tr>
+        </thead>
+        <tbody id="use1-body"></tbody>
+      </table>
+    </div>
+    
+    <div id="view-use2-shop" class="view use-view">
+      <h3>ร้านค้า 2: บันทึกการใช้คูปอง</h3>
+      <p id="use2-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p> <!-- ✅ เพิ่ม -->
+      <form id="use2-form" class="shop-form">
+        <input type="text" id="use2-id" class="s123" placeholder="รหัส ID นักเรียน" required>
+        <button type="submit">บันทึกการใช้</button>
+      </form>
+      <div class="amount-control">
+        <button type="button" class="B1" onclick="changeAmount('use2', -5)">-5</button>
+        <span id="use2-amount">5</span>
+        <button type="button" class="B2" onclick="changeAmount('use2', 5)">+5</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th></tr>
+        </thead>
+        <tbody id="use2-body"></tbody>
+      </table>
+    </div>
+    
+    <div id="view-use3-shop" class="view use-view">
+      <h3>ร้านค้า 3: บันทึกการใช้คูปอง</h3>
+      <p id="use3-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p> <!-- ✅ เพิ่ม -->
+      <form id="use3-form" class="shop-form">
+        <input type="text" id="use3-id" class="s123" placeholder="รหัส ID นักเรียน" required>
+        <button type="submit">บันทึกการใช้</button>
+      </form>
+      <div class="amount-control">
+        <button type="button" class="B1" onclick="changeAmount('use3', -5)">-5</button>
+        <span id="use3-amount">5</span>
+        <button type="button" class="B2" onclick="changeAmount('use3', 5)">+5</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th></tr>
+        </thead>
+        <tbody id="use3-body"></tbody>
+      </table>
+    </div>
+
+    <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+    <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+  
+  <script src="script.js"></script>
+</body>
+</html>
