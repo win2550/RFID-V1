@@ -266,9 +266,9 @@ function updateShopTable(shopNumber, role = 'shop') {
 
 
 const useAmounts = {
-  use1: 5,
-  use2: 5,
-  use3: 5
+  use1: 20,
+  use2: 20,
+  use3: 20
 };
 
 // โหลดค่าล่าสุดจาก localStorage ถ้ามี
