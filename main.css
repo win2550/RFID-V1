@@ -856,6 +856,26 @@ box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   cursor: pointer;
 }
 
+.user-dropdown-menu .semester-settings-btn {
+  margin-left: 0px !important;
+  /* margin-left: 0px !important;  ถ้าไม่จำเป็น ให้ลบออก */
+  width: 100%;
+  background-color: #2ed818;
+  color: #343a40;
+  border: none;
+  padding: 10px 15px;
+  /* *** แก้ไขตรงนี้: เปลี่ยนเป็น border-radius: 5px; หรือ 8px; ตามที่คุณต้องการ *** */
+  border-radius: 5px; /* หรือ 8px */
+  text-align: left;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* *** เพิ่ม transition ให้ครอบคลุม transform และ box-shadow ด้วย *** */
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
 .user-dropdown-menu .clear-all-data-btn:hover {
   background-color: #e0a800; /* สีเหลืองเข้มขึ้นเมื่อโฮเวอร์ */
   transform: none; /* *** ต้องแน่ใจว่ามันคือ none เพื่อยกเลิกการเลื่อนขึ้น *** */
