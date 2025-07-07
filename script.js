@@ -54,9 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
   cleanOldHistoricalData();
 });
 
-//หน้าlogin อีเมล-รหัสผ่าน  //หน้าlogin อีเมล-รหัสผ่าน  //หน้าlogin อีเมล-รหัสผ่าน  //หน้าlogin อีเมล-รหัสผ่าน  //หน้าlogin อีเมล-รหัสผ่าน
-
-
 // โหลดวันที่ปัจจุบัน (เช่น "2025-06-04")
 const todayStr = new Date().toISOString().split("T")[0];
 
@@ -120,7 +117,6 @@ localStorage.setItem("lastUpdatedDate", todayStr);
    ], 
 };
 
-
 // เพิ่มเงินแอดมิน
 function topUpCoupon() {
   const studentId = document.getElementById("student-id").value.trim();
@@ -136,13 +132,11 @@ function topUpCoupon() {
 
         studentFound = true;
 
-        // ✅ บันทึกข้อมูลทั้งหมดกลับเข้า localStorage
         localStorage.setItem("classData", JSON.stringify(classData));
 
         document.getElementById("topup-message").innerText =
           `เติมเงินให้ ${student.name} (${student.id}) สำเร็จ! ยอดคงเหลือ: ${student.balance} บาท`;
 
-        // เคลียร์ช่อง input
         document.getElementById("student-id").value = "";
         document.getElementById("amount-topup").value = "";
 
@@ -495,7 +489,6 @@ function dailyClearData() {
   const todayKey = formatDate(now); // YYYY-MM-DD
 
   if (todayData.length > 0) {
-    // ✅ เก็บ todayData ลง historicalData
     if (!historicalData[todayKey]) {
       historicalData[todayKey] = [];
     }
@@ -504,7 +497,6 @@ function dailyClearData() {
     console.log(`Saved ${todayData.length} records to historicalData[${todayKey}]`);
   }
 
-  // ✅ ล้าง todayData
   todayData = [];
   localStorage.setItem('todayData', JSON.stringify(todayData));
   console.log(`todayData cleared for ${todayKey}`);
@@ -515,18 +507,27 @@ function dailyClearData() {
     console.log(`Removed useData${i} from localStorage`);
   }
 
+  // ✅ ล้างตารางร้านค้าใน DOM ด้วย
+  for (let i = 1; i <= 3; i++) {
+    const shopTbody = document.getElementById(`shop${i}-admin-body`);
+    const useTbody = document.getElementById(`use${i}-body`);
+    if (shopTbody) shopTbody.innerHTML = '';
+    if (useTbody) useTbody.innerHTML = '';
+  }
+
   // ✅ อัปเดตหน้าจอถ้า admin กำลังดู
   if (currentUserRole === 'admin') {
     renderTodayTable();
     for (const className in classData) {
       updateClassTable(className);
     }
-    updateSummaryAllView();
+    updateSummaryAllView?.();
   }
 
-  cleanOldHistoricalData(); // ลบย้อนหลังเกิน 1 ปี
-  scheduleDailyClear();     // ตั้งใหม่สำหรับวันถัดไป
+  cleanOldHistoricalData();
+  scheduleDailyClear();
 }
+
 
 
 // --- Data Management and Scheduling ---
@@ -1335,6 +1336,71 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // === ฟังก์ชันรวมสำหรับแสดงข้อมูลตามช่วงเวลาที่จำกัด ===
 
+const months = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+];
+
+function populateSemesterDropdowns() {
+  const ids = ['term1-start', 'term1-end', 'term2-start', 'term2-end'];
+  ids.forEach(id => {
+    const select = document.getElementById(id);
+    select.innerHTML = '';
+    months.forEach((name, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+  });
+
+  // โหลดค่าที่บันทึกไว้
+  const saved = JSON.parse(localStorage.getItem('semesterSettings')) || {
+    term1: { start: 4, end: 9 }, // พ.ค.–ต.ค.
+    term2: { start: 10, end: 2 } // พ.ย.–มี.ค.
+  };
+  document.getElementById('term1-start').value = saved.term1.start;
+  document.getElementById('term1-end').value = saved.term1.end;
+  document.getElementById('term2-start').value = saved.term2.start;
+  document.getElementById('term2-end').value = saved.term2.end;
+}
+
+function openSemesterSettings() {
+  console.log("📌 เรียก openSemesterSettings แล้ว"); // <— เช็กว่าเรียก
+  populateSemesterDropdowns(); // โหลด dropdown เดือน
+  const modal = document.getElementById('semester-modal');
+  if (modal) {
+    modal.style.display = 'block'; // แสดง modal
+    console.log("✅ แสดง modal สำเร็จ");
+  } else {
+    console.error("❌ ไม่พบ element #semester-modal");
+  }
+}
+
+
+function closeSemesterModal() {
+  document.getElementById('semester-modal').style.display = 'none';
+}
+
+function saveSemesterSettings() {
+  const term1 = {
+    start: parseInt(document.getElementById('term1-start').value),
+    end: parseInt(document.getElementById('term1-end').value),
+  };
+  const term2 = {
+    start: parseInt(document.getElementById('term2-start').value),
+    end: parseInt(document.getElementById('term2-end').value),
+  };
+
+  localStorage.setItem('semesterSettings', JSON.stringify({ term1, term2 }));
+  alert('✅ บันทึกช่วงเดือนของแต่ละเทอมสำเร็จ');
+  closeSemesterModal();
+
+  // ถ้ามีตารางรายเทอมที่เปิดอยู่ อัปเดตเลย
+  updateSummaryAllView?.();
+}
+
+
 // ช่วย format วันที่เป็น YYYY-MM-DD
 function formatDate(date) {
   const year = date.getFullYear();
@@ -1355,7 +1421,7 @@ function isDateInCustomPeriod(date, now, period) {
 
     case 'weekly': {
       const monday = new Date(now);
-      monday.setDate(now.getDate() - now.getDay() + 1); // จันทร์นี้
+      monday.setDate(now.getDate() - now.getDay() + 1);
       monday.setHours(0, 0, 0, 0);
 
       const sunday = new Date(monday);
@@ -1369,9 +1435,24 @@ function isDateInCustomPeriod(date, now, period) {
       return date.getMonth() === now.getMonth() && year === now.getFullYear();
 
     case 'semester': {
-      const isFirstHalf = now.getMonth() < 6; // ม.ค.–มิ.ย.
-      const validMonths = isFirstHalf ? [0,1,2,3,4,5] : [6,7,8,9,10,11];
-      return validMonths.includes(month) && year === now.getFullYear();
+      // 🔹 โหลดค่าที่ผู้ใช้ตั้งไว้ หรือ fallback เป็น พ.ค.–ต.ค. / พ.ย.–มี.ค.
+      const config = JSON.parse(localStorage.getItem('semesterSettings')) || {
+        term1: { start: 4, end: 9 },  // พ.ค. (4) ถึง ต.ค. (9)
+        term2: { start: 10, end: 2 }  // พ.ย. (10) ถึง มี.ค. (2)
+      };
+
+      const m = date.getMonth(); // เดือนของวันที่ที่กำลังตรวจสอบ
+
+      // 🔹 ฟังก์ชันตรวจว่าเดือน m อยู่ในช่วง start ถึง end หรือไม่ (รองรับข้ามปี)
+      function inRange(start, end, m) {
+        return start <= end
+          ? (m >= start && m <= end) // เช่น 4-9 → พ.ค.–ต.ค.
+          : (m >= start || m <= end); // เช่น 10-2 → พ.ย.–มี.ค. (ข้ามปี)
+      }
+
+      // 🔹 ตรวจว่าตรงกับเทอม 1 หรือเทอม 2
+      return inRange(config.term1.start, config.term1.end, m) ||
+             inRange(config.term2.start, config.term2.end, m);
     }
 
     case 'yearly':
@@ -1381,6 +1462,7 @@ function isDateInCustomPeriod(date, now, period) {
       return false;
   }
 }
+
 
 // ดึงข้อมูลตามช่วงเวลา (class: m11, m12, ...)
 function getRecordsByPeriod(viewId, period) {
@@ -1594,6 +1676,7 @@ window.toggleSummarySubmenu = toggleSummarySubmenu;
 window.toggleSummaryClassSubmenu = toggleSummaryClassSubmenu;
 window.toggleUserMenu = toggleUserMenu;
 window.clearAllDataManually = clearAllDataManually;
+window.openSemesterSettings = openSemesterSettings;
 // ✅ เรียกคืนข้อมูลร้านค้า 1, 2, 3 ทันทีเมื่อโหลดเว็บ
 window.addEventListener("DOMContentLoaded", () => {
   restoreUseTable(1);
