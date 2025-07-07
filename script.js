@@ -64,18 +64,6 @@ let historicalData = JSON.parse(localStorage.getItem('historicalData')) || {};
 // ตรวจสอบวันล่าสุดที่อัปเดต
 const lastUpdatedDate = localStorage.getItem("lastUpdatedDate");
 
-// ถ้าไม่ใช่วันเดิม แสดงว่าเป็นวันใหม่
-if (lastUpdatedDate && lastUpdatedDate !== todayStr) {
-  // ย้ายข้อมูลวันนี้ไปเก็บเป็นของเมื่อวาน
-  if (todayData.length > 0) {
-    historicalData[lastUpdatedDate] = (historicalData[lastUpdatedDate] || []).concat(todayData);
-  }
-
-  // เคลียร์ข้อมูลวันนี้
-  todayData = [];
-  localStorage.setItem("todayData", JSON.stringify(todayData));
-  localStorage.setItem("historicalData", JSON.stringify(historicalData));
-}
 
 // ตั้งค่าวันใหม่
 localStorage.setItem("lastUpdatedDate", todayStr);
@@ -470,62 +458,44 @@ function updateCurrentDateTime() {
 
 setInterval(updateCurrentDateTime, 1000); // Update every second
 
-function scheduleDailyClear() {
-  const now = new Date();
-  const clearTime = new Date(now);
-  clearTime.setDate(clearTime.getDate() + 1); // วันถัดไป
-  clearTime.setHours(0, 0, 0, 0); // เวลา 00:00 น.
+function resetDailyDataIfNeeded() {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const lastResetDate = localStorage.getItem("lastResetDate");
 
-  const delay = clearTime.getTime() - now.getTime();
+  if (lastResetDate !== todayStr) {
+    console.log(`🕒 พบว่าเป็นวันใหม่ → เริ่มรีเซ็ตข้อมูลประจำวันที่ ${todayStr}`);
 
-  console.log(`Scheduled daily data clear at ${clearTime.toLocaleTimeString('th-TH')} for next trigger in ${Math.floor(delay / 1000 / 60)} minutes.`);
-  setTimeout(dailyClearData, delay);
-}
+    // ✅ ย้าย todayData ไป historicalData
+    let todayData = JSON.parse(localStorage.getItem("todayData")) || [];
+    let historicalData = JSON.parse(localStorage.getItem("historicalData")) || {};
 
-
-function dailyClearData() {
-  console.log('Performing daily data clear...');
-  const now = new Date();
-  const todayKey = formatDate(now); // YYYY-MM-DD
-
-  if (todayData.length > 0) {
-    if (!historicalData[todayKey]) {
-      historicalData[todayKey] = [];
+    if (todayData.length > 0 && lastResetDate) {
+      historicalData[lastResetDate] = (historicalData[lastResetDate] || []).concat(todayData);
+      localStorage.setItem("historicalData", JSON.stringify(historicalData));
+      console.log(`➡️ ย้าย todayData ไปที่ historicalData[${lastResetDate}]`);
     }
-    historicalData[todayKey].push(...todayData);
-    localStorage.setItem('historicalData', JSON.stringify(historicalData));
-    console.log(`Saved ${todayData.length} records to historicalData[${todayKey}]`);
-  }
 
-  todayData = [];
-  localStorage.setItem('todayData', JSON.stringify(todayData));
-  console.log(`todayData cleared for ${todayKey}`);
+    // ✅ รีเซ็ต todayData
+    localStorage.setItem("todayData", JSON.stringify([]));
 
-  // ✅ ลบข้อมูลร้านค้า useData1–3
-  for (let i = 1; i <= 3; i++) {
-    localStorage.removeItem(`useData${i}`);
-    console.log(`Removed useData${i} from localStorage`);
-  }
-
-  // ✅ ล้างตารางร้านค้าใน DOM ด้วย
-  for (let i = 1; i <= 3; i++) {
-    const shopTbody = document.getElementById(`shop${i}-admin-body`);
-    const useTbody = document.getElementById(`use${i}-body`);
-    if (shopTbody) shopTbody.innerHTML = '';
-    if (useTbody) useTbody.innerHTML = '';
-  }
-
-  // ✅ อัปเดตหน้าจอถ้า admin กำลังดู
-  if (currentUserRole === 'admin') {
-    renderTodayTable();
-    for (const className in classData) {
-      updateClassTable(className);
+    // ✅ รีเซ็ต useData1–3
+    for (let i = 1; i <= 3; i++) {
+      localStorage.removeItem(`useData${i}`);
     }
-    updateSummaryAllView?.();
-  }
 
-  cleanOldHistoricalData();
-  scheduleDailyClear();
+    // ✅ อัปเดตวันที่ล่าสุดที่เคยรีเซ็ต
+    localStorage.setItem("lastResetDate", todayStr);
+
+    // ✅ เคลียร์ตาราง HTML ที่เกี่ยวข้อง (optionally)
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById(`use${i}-body`)?.replaceChildren();
+      document.getElementById(`shop${i}-admin-body`)?.replaceChildren();
+    }
+
+    document.getElementById('today-body')?.replaceChildren();
+  } else {
+    console.log("✅ วันที่ยังไม่เปลี่ยน ไม่ต้องรีเซ็ตข้อมูล");
+  }
 }
 
 
@@ -1682,4 +1652,12 @@ window.addEventListener("DOMContentLoaded", () => {
   restoreUseTable(1);
   restoreUseTable(2);
   restoreUseTable(3);
+});
+document.addEventListener('DOMContentLoaded', () => {
+  resetDailyDataIfNeeded(); // ✅ ← เรียกตรงนี้ก่อนโหลดข้อมูลอื่น
+  // แล้วค่อยโหลดข้อมูลเดิม เช่น
+  restoreUseTable(1);
+  restoreUseTable(2);
+  restoreUseTable(3);
+  renderTodayData();
 });
