@@ -34,13 +34,26 @@
                   <button class="logout-btn" onclick="logout()">
                       <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
                   </button>
+                  <button class="menu-item semester-settings-btn" onclick="openSemesterSettings()">
+                    <i class="fas fa-calendar-alt"></i> ตั้งค่าเทอมการศึกษา
+                  </button>
                   <button class="menu-item clear-all-data-btn" onclick="clearAllDataManually()">
                     <i class="fas fa-trash-alt"></i> ล้างข้อมูลทั้งหมด
                   </button>
               </div>
           </div>
-          </div>
+        </div>
       </div>
+
+    <div id="semester-modal" class="modal" style="display:none; position:fixed; top:20%; left:30%; background:#fff; border:1px solid #ccc; padding:20px; z-index:10000; box-shadow:0 0 15px rgba(0,0,0,0.3); border-radius:8px;">
+      <h3>⚙️ ตั้งค่าเดือนของแต่ละเทอม</h3>
+      <label>📘 เทอม 1: </label>
+      <select id="term1-start"></select> ถึง <select id="term1-end"></select><br><br>
+      <label>📗 เทอม 2: </label>
+      <select id="term2-start"></select> ถึง <select id="term2-end"></select><br><br>
+      <button onclick="saveSemesterSettings()">✅ บันทึก</button>
+      <button onclick="closeSemesterModal()">❌ ปิด</button>
+    </div>
   
       <div class="sidebar">
         <ul>
@@ -179,7 +192,7 @@
 
         <div id="view-today" class="view">
           <h3>สถิติวันนี้</h3>
-          <p id="today-total-used" style="font-weight: bold; color: #d35400;"></p> <!-- ✅ เพิ่ม -->
+          <p id="today-total-used" style="font-weight: bold; color: #d35400;"></p>
           <table>
             <thead>
               <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th></tr>
@@ -429,7 +442,7 @@
 
         <div id="view-shop1-admin" class="view shop-admin-view">
           <h3>ข้อมูลการใช้คูปองของร้านค้า 1</h3>
-          <p id="shop1-total-used" style="font-weight: bold; color: #d35400;"></p> <!-- ✅ เพิ่ม -->
+          <p id="shop1-total-used" style="font-weight: bold; color: #d35400;"></p>
           <table>
             <thead>
               <tr><th>ลำดับ</th><th>ชื่อ</th><th>ID</th><th>ร้านค้า</th><th>เวลา</th><th>คงเหลือ</th><th>ใช้เงิน</th>
@@ -475,12 +488,12 @@
         <h3 class="หัวข้อ" id="use-page-header"></h3> <div id="current-datetime" style="font-size: 1.2em; color: #000000; margin-left: auto; margin-right: 20px;"></div>
        <div class="menu-dropdown" id="shopMenuDropdown">
           <a href="#" class="ous" onclick="logout()">ออกจากระบบ</a>
-        </div>
       </div>
+    </div>
 
     <div id="view-use1-shop" class="view use-view">
       <h3>ร้านค้า 1: บันทึกการใช้คูปอง</h3>
-      <p id="use1-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p> <!-- ✅ เพิ่ม -->
+      <p id="use1-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p>
       <form id="use1-form" class="shop-form">
         <input type="text" id="use1-id" class="s123" placeholder="รหัส ID นักเรียน" required>
         <button type="submit">บันทึกการใช้</button>
@@ -500,7 +513,7 @@
     
     <div id="view-use2-shop" class="view use-view">
       <h3>ร้านค้า 2: บันทึกการใช้คูปอง</h3>
-      <p id="use2-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p> <!-- ✅ เพิ่ม -->
+      <p id="use2-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p>
       <form id="use2-form" class="shop-form">
         <input type="text" id="use2-id" class="s123" placeholder="รหัส ID นักเรียน" required>
         <button type="submit">บันทึกการใช้</button>
@@ -520,7 +533,7 @@
     
     <div id="view-use3-shop" class="view use-view">
       <h3>ร้านค้า 3: บันทึกการใช้คูปอง</h3>
-      <p id="use3-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p> <!-- ✅ เพิ่ม -->
+      <p id="use3-total-used" style="font-weight: bold; color: #2980b9; margin-left: 40px; "></p>
       <form id="use3-form" class="shop-form">
         <input type="text" id="use3-id" class="s123" placeholder="รหัส ID นักเรียน" required>
         <button type="submit">บันทึกการใช้</button>
@@ -540,6 +553,7 @@
 
     <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
     <!-- ---------------------------------------------ตารางสำหรับร้านค้า--------------------------------------------- -->
+    
   
   <script src="script.js"></script>
 </body>
